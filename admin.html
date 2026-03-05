@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINERGIA | Admin Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            padding-top: 100px;
+            background: var(--bg-primary);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .leads-table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        td {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        td:first-child {
+            border-radius: 16px 0 0 16px;
+            border-right: none;
+        }
+
+        td:last-child {
+            border-radius: 0 16px 16px 0;
+            border-left: none;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .priority-HIGH {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .priority-MEDIUM {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .priority-LOW {
+            background: rgba(0, 230, 118, 0.1);
+            color: var(--primary-400);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+        }
+
+        .score-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--primary-500);
+            color: var(--primary-500);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .lead-detail {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <div class="mesh-gradient"></div>
+    <div class="container">
+        <header class="admin-header">
+            <div>
+                <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 10px;">Panel de Leads</h1>
+                <p class="lead-detail">Gestiona y analiza los prospectos calificados por IA.</p>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn-primary" onclick="loadLeads()">Refrescar</button>
+                <button class="btn-primary"
+                    style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);"
+                    onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <div class="leads-table-container">
+            <table id="leads-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Contacto</th>
+                        <th>Score</th>
+                        <th>Prioridad</th>
+                        <th>Análisis de IA</th>
+                        <th>Acción Sugerida</th>
+                    </tr>
+                </thead>
+                <tbody id="leads-body">
+                    <!-- Leads will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('sinergia_token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            loadLeads();
+        });
+
+        function logout() {
+            localStorage.removeItem('sinergia_token');
+            window.location.href = 'login.html';
+        }
+
+        async function loadLeads() {
+            const token = localStorage.getItem('sinergia_token');
+            const tableBody = document.getElementById('leads-body');
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando leads...</td></tr>';
+
+            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:5000'
+                : 'https://api.sinergia.sbs';
+
+            try {
+                const response = await fetch(`${API_URL}/api/contact`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    tableBody.innerHTML = '';
+                    data.leads.forEach(lead => {
+                        const date = new Date(lead.created_at).toLocaleDateString();
+                        const row = `
+                            <tr>
+                                <td>${date}</td>
+                                <td>
+                                    <div style="font-weight: 600;">${lead.name}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-quaternary);">${lead.email}</div>
+                                </td>
+                                <td><div class="score-pill">${lead.score}</div></td>
+                                <td><span class="status-badge priority-${lead.priority}">${lead.priority}</span></td>
+                                <td><div class="lead-detail">${lead.analysis}</div></td>
+                                <td><div class="lead-detail" style="color: var(--primary-400);">${lead.suggested_action}</div></td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                }
+            } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #ef4444;">Error al cargar datos. Verifica que el servidor esté corriendo.</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadLeads);
+    </script>
+</body>
+
+</html>
