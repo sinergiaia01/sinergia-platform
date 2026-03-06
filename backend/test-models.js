@@ -3,20 +3,18 @@ require('dotenv').config();
 
 async function listModels() {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    try {
-        // There is no direct listModels in the SDK for clients usually, but let's try to see if we can find it or just try common ones.
-        const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro', 'gemini-1.0-pro'];
-        for (const m of models) {
-            try {
-                const model = genAI.getGenerativeModel({ model: m });
-                await model.generateContent("test");
-                console.log(`✅ Model ${m} is working`);
-            } catch (e) {
-                console.log(`❌ Model ${m} failed: ${e.message}`);
-            }
+    const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro', 'gemini-1.5-flash-latest', 'gemini-1.5-flash-001'];
+
+    for (const m of models) {
+        console.log(`Testing model: ${m}...`);
+        try {
+            const model = genAI.getGenerativeModel({ model: m });
+            const result = await model.generateContent("Hola");
+            console.log(`✅ Model ${m} is working: ${result.response.text()}`);
+            return;
+        } catch (e) {
+            console.log(`❌ Model ${m} failed: ${e.message}`);
         }
-    } catch (err) {
-        console.error(err);
     }
 }
 

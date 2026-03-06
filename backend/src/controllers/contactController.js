@@ -21,7 +21,10 @@ const submitContact = async (req, res) => {
             email: validatedData.email,
             phone: validatedData.phone,
             message: validatedData.message || "",
-            analysis: leadAnalysis,
+            ai_score: leadAnalysis.score,
+            ai_priority: leadAnalysis.priority,
+            ai_analysis: leadAnalysis.analysis,
+            ai_action: leadAnalysis.suggestedAction,
             receivedAt: new Date().toISOString()
         };
 
