@@ -17,10 +17,16 @@ const submitContact = async (req, res) => {
         // 4. Notificación a n8n
         // Combinamos los datos del contacto con el análisis de la IA
         const fullPayload = {
-            ...validatedData,
+            name: validatedData.name,
+            email: validatedData.email,
+            phone: validatedData.phone,
+            message: validatedData.message || "",
             analysis: leadAnalysis,
             receivedAt: new Date().toISOString()
         };
+
+        console.log('--- Payload enviada a n8n ---');
+        console.log(JSON.stringify(fullPayload, null, 2));
 
         await sendToN8n(fullPayload);
 
