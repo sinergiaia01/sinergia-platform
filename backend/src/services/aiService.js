@@ -9,7 +9,7 @@ const analyzeLead = async (contactData) => {
             return { score: "N/A", priority: "MEDIUM", analysis: "API Key no configurada" };
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
       Actúa como un experto en ventas B2B para una empresa de IA y Automatización llamada SINERGIA.
