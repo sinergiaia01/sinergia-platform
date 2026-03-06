@@ -56,4 +56,26 @@ const getLeads = async () => {
     }
 };
 
-module.exports = { saveLead, getLeads };
+const getUserByUsername = async (username) => {
+    if (!supabaseUrl || !supabaseKey) return null;
+
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', username)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null; // No se encontró el usuario
+            throw error;
+        }
+        return data;
+    } catch (error) {
+        console.error('❌ Error obteniendo usuario de Supabase:', error.message);
+        return null;
+    }
+};
+
+module.exports = { saveLead, getLeads, getUserByUsername };
+
