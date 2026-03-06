@@ -15,16 +15,18 @@ const submitContact = async (req, res) => {
         await saveLead(validatedData, leadAnalysis);
 
         // 4. Notificación a n8n
-        // Combinamos los datos del contacto con el análisis de la IA
         const fullPayload = {
             name: validatedData.name,
             email: validatedData.email,
             phone: validatedData.phone,
             message: validatedData.message || "",
+            // Nueva estructura (aplanada)
             ai_score: leadAnalysis.score,
             ai_priority: leadAnalysis.priority,
             ai_analysis: leadAnalysis.analysis,
             ai_action: leadAnalysis.suggestedAction,
+            // Estructura antigua (por si n8n no se actualizó)
+            analysis: leadAnalysis,
             receivedAt: new Date().toISOString()
         };
 

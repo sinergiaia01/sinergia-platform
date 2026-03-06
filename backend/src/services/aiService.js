@@ -10,7 +10,7 @@ const analyzeLead = async (contactData) => {
         }
 
         console.log(`🤖 Iniciando análisis con IA para: ${contactData.email}...`);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
       Actúa como un experto en ventas B2B para una empresa de IA y Automatización llamada SINERGIA.
@@ -42,8 +42,9 @@ const analyzeLead = async (contactData) => {
             return { score: 50, priority: "MEDIUM", analysis: "Error al procesar análisis detallado", suggestedAction: "Revisar manualmente" };
         }
     } catch (error) {
-        console.error("Error en servicio de IA:", error);
-        return { score: 0, priority: "LOW", analysis: "Error técnico en el análisis", suggestedAction: "Contactar soporte técnico" };
+        console.error("❌ Error en servicio de IA:", error.message);
+        if (error.response) console.error("Detalles:", error.response.status, error.response.statusText);
+        return { score: 0, priority: "LOW", analysis: "Error de conexión con la IA", suggestedAction: "Verificar API Key" };
     }
 };
 
