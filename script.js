@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Navbar Scroll Effect
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
@@ -9,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Intersection Observer for Reveal Animations
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -17,18 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const revealObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-
-                // If it's a stats item, animate the counter
-                const counter = entry.target.querySelector('.counter');
-                if (counter && !counter.classList.contains('animated')) {
-                    animateCounter(counter);
-                    counter.classList.add('animated');
-                }
-
-                observer.unobserve(entry.target);
+            if (!entry.isIntersecting) {
+                return;
             }
+
+            entry.target.classList.add('active');
+
+            const counter = entry.target.querySelector('.counter');
+            if (counter && !counter.classList.contains('animated')) {
+                animateCounter(counter);
+                counter.classList.add('animated');
+            }
+
+            observer.unobserve(entry.target);
         });
     }, observerOptions);
 
@@ -36,11 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         revealObserver.observe(el);
     });
 
-    // Counter Animation Logic
     function animateCounter(element) {
-        const target = parseInt(element.getAttribute('data-target'));
+        const target = parseInt(element.getAttribute('data-target'), 10);
         const duration = 2000;
-        const stepTime = 16; // 60fps
+        const stepTime = 16;
         const totalSteps = duration / stepTime;
         const increment = target / totalSteps;
         let current = 0;
@@ -56,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, stepTime);
     }
 
-    // Mobile Menu Toggle (Simplified)
     const mobileToggle = document.getElementById('mobile-toggle');
     const navLinks = document.querySelector('.nav-links');
 
@@ -73,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Smooth Scroll for Nav Links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -87,10 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Particle Background (Simplified Canvas approach)
     const initParticles = () => {
         const container = document.getElementById('particles-js');
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
         for (let i = 0; i < 40; i++) {
             const particle = document.createElement('div');
@@ -102,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             particle.style.left = Math.random() * 100 + '%';
             particle.style.top = Math.random() * 100 + '%';
 
-            const animation = particle.animate([
+            particle.animate([
                 { transform: 'translate(0, 0)', opacity: 0.3 },
                 { transform: `translate(${Math.random() * 200 - 100}px, ${Math.random() * -200 - 50}px)`, opacity: 0 }
             ], {
@@ -117,9 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initParticles();
 
-    // 3D Tilt Effect for Service Cards
-    const cards = document.querySelectorAll('[data-tilt]');
-    cards.forEach(card => {
+    document.querySelectorAll('[data-tilt]').forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -133,14 +128,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         card.addEventListener('mouseleave', () => {
-            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
         });
     });
 
-    // Mesh Gradient Mouse Follow
     const mesh = document.querySelector('.mesh-gradient');
     document.addEventListener('mousemove', (e) => {
-        if (!mesh) return;
+        if (!mesh) {
+            return;
+        }
+
         const x = (e.clientX / window.innerWidth) * 100;
         const y = (e.clientY / window.innerHeight) * 100;
         mesh.style.background = `
@@ -151,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     });
 
-    // Form Submission Logic (n8n ready)
     const contactForm = document.getElementById('contact-form');
     const formStatus = document.getElementById('form-status');
 
@@ -159,18 +155,21 @@ document.addEventListener('DOMContentLoaded', () => {
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:5000'
                 : 'https://api.sinergia.sbs';
 
             const formData = new FormData(contactForm);
             const data = Object.fromEntries(formData.entries());
 
+            data.source = 'landing_sinergia_web';
+            data.message = (data.message || '').trim();
+
             formStatus.textContent = 'Enviando...';
             formStatus.className = 'form-status';
 
             try {
-                const response = await fetch(`${API_URL}/api/contact`, {
+                const response = await fetch(`${apiUrl}/api/contact`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -178,18 +177,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(data)
                 });
 
-                const result = await response.json();
-
-                if (result.success) {
-                    formStatus.textContent = '🎉 ¡Mensaje enviado con éxito! Nos contactaremos pronto.';
-                    formStatus.className = 'form-status success';
-                    contactForm.reset();
-                } else {
-                    throw new Error(result.message || 'Error al enviar');
+                let result = null;
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    result = null;
                 }
 
+                if (!response.ok || !result || !result.success) {
+                    const message = result && result.message ? result.message : 'Error al enviar';
+                    throw new Error(message);
+                }
+
+                formStatus.textContent = 'Mensaje enviado. Te responderemos con un siguiente paso concreto.';
+                formStatus.className = 'form-status success';
+                contactForm.reset();
             } catch (error) {
-                formStatus.textContent = '❌ Hubo un error al enviar. Por favor intenta de nuevo.';
+                formStatus.textContent = 'No pudimos enviar el formulario. Intenta de nuevo en unos minutos.';
                 formStatus.className = 'form-status error';
             }
         });
