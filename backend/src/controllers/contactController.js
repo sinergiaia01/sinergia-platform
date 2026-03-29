@@ -2,6 +2,7 @@ const { contactSchema } = require('../schemas/contactSchema');
 const { analyzeLead } = require('../services/aiService');
 const { sendToN8n } = require('../services/webhookService');
 const { saveLead, getLeads } = require('../services/databaseService');
+const { syncLeadToBartolina } = require('../services/bartolinaService');
 
 const submitContact = async (req, res) => {
     try {
@@ -14,34 +15,27 @@ const submitContact = async (req, res) => {
         // 3. Guardar en Supabase (Persistencia)
         await saveLead(validatedData, leadAnalysis);
 
-        // 4. Notificación a n8n
+        const bartolinaSync = await syncLeadToBartolina(validatedData);
+
+        // 4. Notificacion a n8n
+        // Combinamos los datos del contacto con el analisis de la IA
         const fullPayload = {
-            name: validatedData.name,
-            email: validatedData.email,
-            phone: validatedData.phone,
-            message: validatedData.message || "",
-            // Nueva estructura (aplanada)
-            ai_score: leadAnalysis.score,
-            ai_priority: leadAnalysis.priority,
-            ai_analysis: leadAnalysis.analysis,
-            ai_action: leadAnalysis.suggestedAction,
-            // Estructura antigua (por si n8n no se actualizó)
+            ...validatedData,
             analysis: leadAnalysis,
+            bartolinaSync,
             receivedAt: new Date().toISOString()
         };
-
-        console.log('--- Payload enviada a n8n ---');
-        console.log(JSON.stringify(fullPayload, null, 2));
 
         await sendToN8n(fullPayload);
 
         console.log('Nuevo Lead Procesado Correctamente:', validatedData.email);
 
-        // 5. Respuesta de éxito
+        // 5. Respuesta de exito
         res.status(201).json({
             success: true,
             message: 'Contacto recibido correctamente',
-            leadAnalysis
+            leadAnalysis,
+            bartolinaSync
         });
 
     } catch (error) {
