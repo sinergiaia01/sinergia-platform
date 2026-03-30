@@ -8,11 +8,98 @@ const serviceLabels = {
     digital_launch: 'Lanzamiento Digital'
 };
 
+const inferPriority = (score) => {
+    if (score >= 75) {
+        return 'HIGH';
+    }
+    if (score >= 45) {
+        return 'MEDIUM';
+    }
+    return 'LOW';
+};
+
+const buildHeuristicLeadAnalysis = (contactData) => {
+    const serviceInterest = contactData.service_interest || 'landing_page';
+    const message = String(contactData.message || '').trim();
+    const normalizedMessage = message.toLowerCase();
+    const factors = [];
+    let score = 25;
+
+    if (contactData.email) {
+        score += 10;
+        factors.push('email disponible');
+    }
+
+    if (contactData.phone) {
+        score += 10;
+        factors.push('telefono disponible');
+    }
+
+    if (message.length >= 30) {
+        score += 10;
+        factors.push('mensaje con contexto');
+    }
+
+    if (message.length >= 80) {
+        score += 5;
+    }
+
+    const serviceWeight = {
+        landing_page: 10,
+        social_media_monthly: 8,
+        digital_launch: 15,
+    };
+
+    if (serviceWeight[serviceInterest]) {
+        score += serviceWeight[serviceInterest];
+        factors.push(`interes en ${serviceLabels[serviceInterest]}`);
+    }
+
+    const commercialSignals = [
+        'propuesta',
+        'presupuesto',
+        'clientes',
+        'vender',
+        'landing',
+        'web',
+        'redes',
+        'lanzamiento',
+        'consulta',
+        'urgente'
+    ];
+
+    const matchedSignals = commercialSignals.filter((signal) => normalizedMessage.includes(signal));
+    score += Math.min(matchedSignals.length * 5, 20);
+
+    if (matchedSignals.length) {
+        factors.push(`senales comerciales: ${matchedSignals.join(', ')}`);
+    }
+
+    score = Math.max(0, Math.min(100, score));
+    const priority = inferPriority(score);
+
+    let suggestedAction = 'pedir un poco mas de contexto antes de cotizar.';
+    if (priority === 'HIGH') {
+        suggestedAction = 'responder con propuesta inicial o agendar discovery corto.';
+    } else if (priority === 'MEDIUM') {
+        suggestedAction = 'responder con discovery breve y confirmar alcance.';
+    }
+
+    return {
+        score,
+        priority,
+        analysis: factors.length
+            ? `Lead calificado por heuristica inicial: ${factors.join('; ')}.`
+            : 'Lead calificado por heuristica inicial con poca informacion.',
+        suggestedAction
+    };
+};
+
 const analyzeLead = async (contactData) => {
     try {
         if (!process.env.GEMINI_API_KEY) {
             console.warn('GEMINI_API_KEY no configurada. Saltando analisis de IA.');
-            return { score: 'N/A', priority: 'MEDIUM', analysis: 'API Key no configurada' };
+            return buildHeuristicLeadAnalysis(contactData);
         }
 
         const model = genAI.getGenerativeModel({ model: 'gemini-pro' });

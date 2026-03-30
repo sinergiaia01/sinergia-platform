@@ -15,10 +15,10 @@ const submitContact = async (req, res) => {
         // 3. Guardar en Supabase (Persistencia)
         await saveLead(validatedData, leadAnalysis);
 
-        const bartolinaSync = await syncLeadToBartolina(validatedData);
+        const bartolinaSync = await syncLeadToBartolina(validatedData, leadAnalysis);
 
-        // 4. Notificacion a n8n
-        // Combinamos los datos del contacto con el analisis de la IA
+        // 4. Notificación a n8n
+        // Combinamos los datos del contacto con el análisis de la IA
         const fullPayload = {
             ...validatedData,
             analysis: leadAnalysis,
@@ -30,7 +30,7 @@ const submitContact = async (req, res) => {
 
         console.log('Nuevo Lead Procesado Correctamente:', validatedData.email);
 
-        // 5. Respuesta de exito
+        // 5. Respuesta de éxito
         res.status(201).json({
             success: true,
             message: 'Contacto recibido correctamente',
