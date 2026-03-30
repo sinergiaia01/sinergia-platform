@@ -6,7 +6,17 @@ const productLabels = {
     digital_launch: 'Lanzamiento Digital'
 };
 
-const buildSinergiaPayload = (contactData) => {
+const mapLeadPriorityToBartolinaPriority = (leadPriority) => {
+    if (leadPriority === 'HIGH') {
+        return 'high';
+    }
+    if (leadPriority === 'LOW') {
+        return 'low';
+    }
+    return 'normal';
+};
+
+const buildSinergiaPayload = (contactData, leadAnalysis = null) => {
     const productType = contactData.service_interest || 'landing_page';
     const productLabel = productLabels[productType] || 'Servicio Sinergia';
     const clientName = (contactData.name || '').trim();
@@ -19,6 +29,10 @@ const buildSinergiaPayload = (contactData) => {
         descriptionParts.push(`Mensaje: ${contactData.message.trim()}`);
     }
 
+    if (leadAnalysis?.analysis) {
+        descriptionParts.push(`Calificacion inicial: ${leadAnalysis.analysis}`);
+    }
+
     return {
         title: `${productLabel} - ${clientName}`,
         description: descriptionParts.join(' '),
@@ -26,6 +40,7 @@ const buildSinergiaPayload = (contactData) => {
         operator: process.env.BARTOLINA_LANDING_OPERATOR || 'sinergia_web',
         segment_hint: 'b2b',
         requested_agent: 'sinergia_ops',
+        priority: mapLeadPriorityToBartolinaPriority(leadAnalysis?.priority),
         client_name: clientName,
         sector: null,
         contact_name: contactData.name,
@@ -37,12 +52,17 @@ const buildSinergiaPayload = (contactData) => {
         context: {
             source: 'sinergia_landing_form',
             landing_channel: 'sinergia.sbs',
-            service_interest: productType
+            service_interest: productType,
+            lead_score: leadAnalysis?.score ?? null,
+            lead_priority: leadAnalysis?.priority ?? null,
+            lead_analysis: leadAnalysis?.analysis ?? null,
+            suggested_action: leadAnalysis?.suggestedAction ?? null,
+            lead_origin: contactData.source || 'landing_sinergia_web'
         }
     };
 };
 
-const syncLeadToBartolina = async (contactData) => {
+const syncLeadToBartolina = async (contactData, leadAnalysis = null) => {
     const webhookUrl = process.env.SINERGIA_OPS_WEBHOOK_URL
         || 'https://n8n.partidosomosjujuy.cloud/webhook/sinergia-ops-intake';
 
@@ -51,7 +71,7 @@ const syncLeadToBartolina = async (contactData) => {
     }
 
     try {
-        const payload = buildSinergiaPayload(contactData);
+        const payload = buildSinergiaPayload(contactData, leadAnalysis);
         const response = await axios.post(webhookUrl, payload, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 15000
