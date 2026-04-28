@@ -265,6 +265,25 @@ h3 {
     max-width: 600px;
 }
 
+.hero-social-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.hero-social-links a,
+.contact-social-links a {
+    color: var(--primary-400);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.hero-social-links a:hover,
+.contact-social-links a:hover {
+    color: var(--primary-300);
+}
+
 .hero-visual {
     position: relative;
 }
@@ -603,6 +622,13 @@ h3 {
     gap: 20px;
 }
 
+.contact-social-links {
+    margin-top: 28px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .meta-item {
     display: flex;
     align-items: center;
@@ -808,6 +834,10 @@ h3 {
 
     .hero-tagline {
         margin-inline: auto;
+    }
+
+    .hero-social-links {
+        justify-content: center;
     }
 
     .hero-title {
