@@ -13,7 +13,7 @@
     --primary-300: #33FF95;
     --primary-400: #00FF85;
     --primary-500: #00E676;
-    /* Verde Innovacion Principal */
+    /* Verde Innovación Principal */
     --primary-600: #00B35C;
     --primary-700: #008042;
     --primary-800: #004D27;
@@ -267,9 +267,21 @@ h3 {
 
 .hero-social-links {
     display: flex;
-    gap: 16px;
-    margin-top: 24px;
+    gap: 14px;
+    margin-top: 28px;
     flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.social-links-label {
+    display: flex;
+    align-items: center;
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 4px;
 }
 
 .hero-social-links a,
@@ -282,6 +294,52 @@ h3 {
 .hero-social-links a:hover,
 .contact-social-links a:hover {
     color: var(--primary-300);
+}
+
+.social-chip {
+    min-width: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 14px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    box-shadow: 0 12px 30px -18px rgba(0, 0, 0, 0.7);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.social-chip:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 230, 118, 0.35);
+    box-shadow: 0 16px 38px -18px rgba(0, 230, 118, 0.25);
+}
+
+.social-chip-kicker {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.social-chip-handle {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.social-chip-instagram {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%),
+        linear-gradient(135deg, rgba(225, 48, 108, 0.14) 0%, rgba(253, 29, 29, 0.06) 45%, rgba(252, 176, 69, 0.14) 100%);
+}
+
+.social-chip-facebook {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%),
+        linear-gradient(135deg, rgba(24, 119, 242, 0.16) 0%, rgba(17, 82, 212, 0.08) 100%);
 }
 
 .hero-visual {
@@ -629,6 +687,51 @@ h3 {
     flex-wrap: wrap;
 }
 
+.social-panel {
+    flex: 1 1 240px;
+    min-height: 104px;
+    padding: 18px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.social-panel:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 230, 118, 0.3);
+    box-shadow: 0 14px 32px -20px rgba(0, 230, 118, 0.3);
+}
+
+.social-panel-title {
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.social-panel-text {
+    color: var(--text-tertiary);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.social-panel-instagram {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%),
+        linear-gradient(135deg, rgba(225, 48, 108, 0.14) 0%, rgba(252, 176, 69, 0.08) 100%);
+}
+
+.social-panel-facebook {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%),
+        linear-gradient(135deg, rgba(24, 119, 242, 0.14) 0%, rgba(17, 82, 212, 0.08) 100%);
+}
+
 .meta-item {
     display: flex;
     align-items: center;
@@ -838,6 +941,12 @@ h3 {
 
     .hero-social-links {
         justify-content: center;
+    }
+
+    .social-links-label {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
     }
 
     .hero-title {
